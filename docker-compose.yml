@@ -1,0 +1,19 @@
+services:
+  auth:
+    build: .
+    image: auth:latest
+    container_name: auth-service
+    ports:
+      - "50551:50551"
+    volumes:
+      - ./configs:/configs:ro
+    environment:
+      - CONFIG_PATH=/configs/config.yaml
+      - CONFIG_ENV=/configs/config.env
+    restart: unless-stopped
+    networks:
+      - auth-network
+
+networks:
+  auth-network:
+    driver: bridge

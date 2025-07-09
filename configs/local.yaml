@@ -1,6 +1,0 @@
-env: "dev"
-storage: "MySQL" #./internal/database
-token_jwt: 3h
-grps: 
-  port: 50051
-  timeout: 10s

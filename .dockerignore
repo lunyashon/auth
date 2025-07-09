@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+logs/
+
+# Test files
+*_test.go
+test/
+
+# Documentation
+docs/
+README.md
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build artifacts
+bin/
+dist/
+
+# Coverage
+coverage.out
+coverage.html 
