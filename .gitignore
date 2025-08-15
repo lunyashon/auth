@@ -28,3 +28,4 @@ go.work.sum
 # air file from development
 tmp/
 .air.toml
+.env.*
