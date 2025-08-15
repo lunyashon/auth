@@ -1,2 +1,0 @@
-# auth
-SSO auth
