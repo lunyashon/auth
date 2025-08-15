@@ -29,3 +29,7 @@ go.work.sum
 tmp/
 .air.toml
 .env.*
+
+#log
+logs/
+*.log
