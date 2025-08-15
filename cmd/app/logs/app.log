@@ -1,0 +1,133 @@
+{"time":"2025-06-01T00:31:10.005689517+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-01T00:31:18.30959529+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-01T00:31:27.213709803+03:00","level":"ERROR","msg":"ERROR database","method":"CheckUser","point":"database.validate","login":"Jekon","message":"rpc error: code = Internal desc = failed to query: pq: relation \"perfmission\" does not exist"}
+{"time":"2025-06-01T00:32:09.186097092+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-01T11:02:21.284480662+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-01T17:12:02.582496449+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-01T17:14:32.078850587+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-01T17:15:40.439877001+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-01T22:52:07.394065305+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-04T23:08:10.682070279+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-04T23:10:03.936190757+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-04T23:16:11.997567811+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-04T23:16:13.005665119+03:00","level":"ERROR","msg":"failed to generate token","method":"LoginUser","point":"token","message":"key is of invalid type: RSA sign expects *rsa.PrivateKey"}
+{"time":"2025-06-04T23:16:35.349174801+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-04T23:16:35.562068685+03:00","level":"ERROR","msg":"failed to generate token","method":"LoginUser","point":"token","message":"key is of invalid type: RSA sign expects *rsa.PrivateKey"}
+{"time":"2025-06-04T23:17:05.299137926+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-04T23:17:05.641519717+03:00","level":"ERROR","msg":"failed to generate token","method":"LoginUser","point":"token","message":"key is of invalid type: RSA sign expects *rsa.PrivateKey"}
+{"time":"2025-06-04T23:17:41.246243583+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-04T23:18:16.387386683+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-04T23:18:17.414485125+03:00","level":"ERROR","msg":"failed to generate token","method":"LoginUser","point":"token","message":"key is of invalid type: RSA sign expects *rsa.PrivateKey"}
+{"time":"2025-06-06T00:06:20.80837835+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-06T00:09:37.425739446+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-06T00:32:39.185423727+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-06T23:30:49.143954576+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-09T00:27:06.709264043+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-10T21:29:41.598041565+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-11T23:57:32.575288373+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-14T21:00:50.399302804+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T00:48:50.000672526+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T13:50:59.69528348+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T15:12:25.201949133+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T15:22:31.146766529+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T15:23:00.2127796+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T15:23:45.475525019+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T15:26:28.408669859+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T15:26:49.447790563+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T15:27:43.890599655+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T15:33:46.078986876+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T15:34:35.306824531+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T15:35:20.67942334+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T16:09:07.143324073+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T16:20:27.147019303+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T16:22:16.458131719+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T17:13:42.347741556+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T17:15:03.399875084+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T17:17:53.783545943+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T18:08:11.035578692+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T18:08:29.888714564+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T18:09:03.398709808+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T18:13:25.06216227+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T18:30:28.934637234+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T19:24:03.662104875+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T19:27:54.232523037+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T19:32:51.052203793+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T20:02:11.549355548+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T20:02:28.977212574+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T20:02:59.446756342+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-15T20:25:12.798606914+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-16T21:31:00.940250627+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-16T23:06:27.172896182+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-17T22:47:49.779385244+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:07:47.28728251+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:09:08.618452541+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:09:21.989071255+03:00","level":"ERROR","msg":"ERROR database","method":"InsertAuthTokens","point":"database.validate","message":"rpc error: code = Internal desc = failed to insert auth tokens pq: INSERT has more expressions than target columns"}
+{"time":"2025-06-19T23:09:21.989648897+03:00","level":"ERROR","msg":"failed to insert refresh token","method":"LoginUser","point":"token","message":"rpc error: code = Internal desc = database error"}
+{"time":"2025-06-19T23:09:58.739057845+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:09:59.858654365+03:00","level":"ERROR","msg":"ERROR database","method":"InsertAuthTokens","point":"database.validate","message":"rpc error: code = Internal desc = failed to insert auth tokens pq: INSERT has more expressions than target columns"}
+{"time":"2025-06-19T23:10:53.076611548+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:11:12.663715661+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:11:15.205069262+03:00","level":"ERROR","msg":"ERROR database","method":"InsertAuthTokens","point":"database.validate","message":"rpc error: code = Internal desc = failed to insert auth tokens pq: date/time field value out of range: \"86400000000000\""}
+{"time":"2025-06-19T23:11:41.532667646+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:11:42.258612484+03:00","level":"ERROR","msg":"ERROR database","method":"InsertAuthTokens","point":"database.validate","message":"rpc error: code = Internal desc = failed to insert auth tokens pq: date/time field value out of range: \"86400000000000\""}
+{"time":"2025-06-19T23:16:30.662681991+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:17:34.866816787+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:18:56.186481531+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:19:49.624329612+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:20:18.204298495+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:20:34.535663154+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-19T23:20:48.49226738+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T13:24:06.204136565+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T13:26:57.103311673+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T13:41:19.584178609+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T13:42:08.205085099+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T13:45:10.765955387+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T13:48:20.682234998+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T13:48:22.229289552+03:00","level":"ERROR","msg":"failed to validate access_token","method":"LogoutUser","point":"validate.refresh_token","message":"rpc error: code = InvalidArgument desc = token type is not access type"}
+{"time":"2025-06-21T13:49:54.288809515+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T13:49:56.76290457+03:00","level":"ERROR","msg":"failed to validate access_token","method":"LogoutUser","point":"validate.access_token","message":"rpc error: code = InvalidArgument desc = token type is not access type"}
+{"time":"2025-06-21T13:50:29.059602513+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T14:11:32.805425094+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T14:12:17.265913794+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T14:13:55.263261668+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T14:14:11.138529851+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T14:14:16.748413236+03:00","level":"ERROR","msg":"ERROR database","method":"RevokeToken","point":"database","message":"rpc error: code = Internal desc = failed to revoke token sql: no rows in result set"}
+{"time":"2025-06-21T14:16:12.986548216+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T14:16:22.569860621+03:00","level":"ERROR","msg":"ERROR database","method":"RevokeToken","point":"database","message":"rpc error: code = Internal desc = failed to revoke token &{<nil> 0xc0002f2140}"}
+{"time":"2025-06-21T14:17:49.346357259+03:00","level":"ERROR","msg":"ERROR database","method":"RevokeToken","point":"database","message":"rpc error: code = Internal desc = failed to revoke token &{<nil> 0xc0002f23c0}"}
+{"time":"2025-06-21T14:18:42.280741508+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T14:18:56.442279679+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T14:18:57.829731656+03:00","level":"ERROR","msg":"ERROR database","method":"RevokeToken","point":"database","message":"rpc error: code = Internal desc = failed to revoke token sql: no rows in result set"}
+{"time":"2025-06-21T14:20:53.763540626+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T14:59:25.7739384+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T15:36:07.816214063+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T15:36:17.528852115+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T15:36:32.40792552+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:18:00.096604599+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:18:03.234591311+03:00","level":"ERROR","msg":"ERROR validate refresh token","method":"UpdateAccessToken","point":"validate.refresh_token","message":"failed to validate refresh token: rpc error: code = InvalidArgument desc = token type is not refresh type"}
+{"time":"2025-06-21T16:23:56.664329266+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:25:45.716227067+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:30:35.120897157+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:33:03.985314413+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:33:32.842252961+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:34:54.671586196+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:39:35.156098457+03:00","level":"ERROR","msg":"ERROR database","method":"CheckActiveToken","point":"database","message":"rpc error: code = Internal desc = failed to check active token sql: no rows in result set"}
+{"time":"2025-06-21T16:39:35.156180101+03:00","level":"ERROR","msg":"ERROR check active refresh token","method":"UpdateAccessToken","point":"check.active_refresh_token","message":"failed to check active refresh token: rpc error: code = Internal desc = database error"}
+{"time":"2025-06-21T16:39:59.784160833+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:40:00.792092165+03:00","level":"ERROR","msg":"ERROR database","method":"CheckActiveToken","point":"database","message":"rpc error: code = Internal desc = failed to check active token sql: no rows in result set"}
+{"time":"2025-06-21T16:40:00.794949849+03:00","level":"ERROR","msg":"ERROR check active refresh token","method":"UpdateAccessToken","point":"check.active_refresh_token","message":"failed to check active refresh token: rpc error: code = Internal desc = database error"}
+{"time":"2025-06-21T16:41:55.543774303+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:41:57.047939074+03:00","level":"ERROR","msg":"ERROR database","method":"CheckActiveToken","point":"database","message":"rpc error: code = Internal desc = failed to check active token sql: no rows in result set"}
+{"time":"2025-06-21T16:42:11.761217607+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:42:13.119414787+03:00","level":"ERROR","msg":"ERROR database","method":"CheckActiveToken","point":"database","message":"rpc error: code = Internal desc = failed to check active token sql: no rows in result set"}
+{"time":"2025-06-21T16:57:38.212960699+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:57:42.412230103+03:00","level":"ERROR","msg":"ERROR database","method":"CheckActiveToken","point":"database","message":"rpc error: code = Internal desc = failed to check active token sql: no rows in result set"}
+{"time":"2025-06-21T16:59:02.571489219+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T16:59:04.055138627+03:00","level":"ERROR","msg":"ERROR database","method":"CheckActiveToken","point":"database","message":"rpc error: code = Internal desc = failed to check active token sql: no rows in result set"}
+{"time":"2025-06-21T17:00:50.299223847+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T17:04:12.526148982+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T18:58:34.628597519+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T19:00:24.280334773+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T19:00:37.697896153+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T19:02:12.357173672+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
+{"time":"2025-06-21T23:28:53.831639577+03:00","level":"INFO","msg":"grpc server started","addr":"[::]:50551"}
