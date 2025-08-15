@@ -3,7 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"slices"
 	"time"
 
 	passauth "github.com/lunyashon/auth/internal/lib/passauth"
@@ -23,6 +23,7 @@ const (
 func (s *DatabaseProvider) CreateInDB(
 	ctx context.Context,
 	data *sso.RegisterRequest,
+	services []int32,
 ) (int64, error) {
 	var (
 		cancel     context.CancelFunc
@@ -74,20 +75,28 @@ func (s *DatabaseProvider) CreateInDB(
 			"point", point,
 			"email", data.GetEmail(),
 			"login", data.GetLogin(),
-			"password", passString,
 			"message", errMessage.Error(),
 		)
 		return 0, status.Errorf(codes.Internal, "database error")
 	}
 
+	servicesStruct, err := s.selectServiceId(ctx, ts, services)
+	if err != nil {
+		return 0, err
+	}
+
 	// Create permission
-	for _, v := range data.Services {
-		if err := s.insertPermission(ctx, ts, id, v, point); err != nil {
+	for key, v := range servicesStruct {
+		if err := s.insertPermission(ctx, ts, id, key, v, point); err != nil {
 			return 0, err
 		}
 	}
 
 	if err := s.updateUsingToken(ctx, ts, data.Token); err != nil {
+		return 0, err
+	}
+
+	if err := s.createUserProfile(ctx, ts, id); err != nil {
 		return 0, err
 	}
 
@@ -112,35 +121,25 @@ func (s *DatabaseProvider) insertPermission(
 	ctx context.Context,
 	ts *sql.Tx,
 	id int64,
-	name, point string,
+	serviceId int32,
+	service bool,
+	point string,
 ) error {
 
 	var (
-		serviceId  int64
 		methodName = "insertPermission"
+		expiresAt  time.Time
 	)
-	const qs = `SELECT id FROM services WHERE name = $1`
-	err := ts.QueryRowContext(ctx, qs, name).Scan(&serviceId)
 
-	switch {
-	case errors.Is(err, sql.ErrNoRows):
-		return status.Errorf(codes.NotFound, "{`%v`} service not found", point)
-	case err != nil:
-		errMessage := status.Errorf(codes.Internal, "failed to get service ID: %v", err)
-		s.log.ErrorContext(
-			ctx,
-			"ERROR database",
-			"method", methodName,
-			"point", point,
-			"service", name,
-			"message", errMessage.Error(),
-		)
-		return status.Errorf(codes.Internal, "database error")
+	if service {
+		expiresAt = time.Now().Add(time.Hour * 24 * 30)
+	} else {
+		expiresAt = time.Now()
 	}
 
-	const qi = `INSERT INTO permission (user_id, service_id) VALUES ($1, $2)`
+	const qi = `INSERT INTO permission (user_id, service_id, active, expires_at) VALUES ($1, $2, $3, $4)`
 
-	if _, err = ts.ExecContext(ctx, qi, id, serviceId); err != nil {
+	if _, err := ts.ExecContext(ctx, qi, id, serviceId, service, expiresAt); err != nil {
 		errMessage := status.Errorf(codes.Internal, "failed to insert permission: %v", err)
 		s.log.ErrorContext(
 			ctx,
@@ -149,6 +148,8 @@ func (s *DatabaseProvider) insertPermission(
 			"point", point,
 			"userID", id,
 			"serviceID", serviceId,
+			"active", service,
+			"expiresAt", expiresAt,
 			"message", errMessage.Error(),
 		)
 		return status.Errorf(codes.Internal, "database error")
@@ -171,6 +172,76 @@ func (s *DatabaseProvider) updateUsingToken(
 			"method", methodName,
 			"point", point,
 			"token", token,
+			"message", errMessage.Error(),
+		)
+		return status.Errorf(codes.Internal, "database error")
+	}
+	return nil
+}
+
+func (s *DatabaseProvider) selectServiceId(
+	ctx context.Context,
+	ts *sql.Tx,
+	services []int32,
+) (map[int32]bool, error) {
+	var (
+		id         int32
+		point      = "select.service.id"
+		methodName = "selectServiceId"
+	)
+	const q = `SELECT id FROM services`
+	rows, err := ts.QueryContext(ctx, q)
+	if err != nil {
+		errMessage := status.Errorf(codes.Internal, "failed to select service ID: %v", err)
+		s.log.ErrorContext(
+			ctx,
+			"ERROR database",
+			"method", methodName,
+			"point", point,
+			"message", errMessage.Error(),
+		)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var servicesBase = make(map[int32]bool, len(services))
+
+	for rows.Next() {
+		if err := rows.Scan(&id); err != nil {
+			errMessage := status.Errorf(codes.Internal, "failed to scan service ID: %v", err)
+			s.log.ErrorContext(
+				ctx,
+				"ERROR database",
+				"method", methodName,
+				"point", point,
+				"message", errMessage.Error(),
+			)
+			return nil, err
+		}
+		if slices.Contains(services, id) {
+			servicesBase[id] = true
+		} else {
+			servicesBase[id] = false
+		}
+	}
+
+	return servicesBase, nil
+}
+
+func (s *DatabaseProvider) createUserProfile(
+	ctx context.Context,
+	ts *sql.Tx,
+	id int64,
+) error {
+	methodName := "createUserProfile"
+	const q = `INSERT INTO users_profile (user_id) VALUES ($1)`
+	if _, err := ts.ExecContext(ctx, q, id); err != nil {
+		errMessage := status.Errorf(codes.Internal, "failed to create user profile: %v", err)
+		s.log.ErrorContext(
+			ctx,
+			"ERROR database",
+			"method", methodName,
+			"point", point,
 			"message", errMessage.Error(),
 		)
 		return status.Errorf(codes.Internal, "database error")

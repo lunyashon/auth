@@ -2,6 +2,7 @@ package validate
 
 import (
 	"context"
+	"fmt"
 	"unicode"
 
 	database "github.com/lunyashon/auth/internal/database/psql"
@@ -22,10 +23,11 @@ var ()
 func RegisterToken(
 	ctx context.Context,
 	data *protoc.TokenRequest,
+	token string,
 	db *database.StructDatabase,
 ) error {
 
-	if err := validateToken(ctx, data.Token, db.Validator); err != nil {
+	if err := validateToken(ctx, token, db.Validator); err != nil {
 		return err
 	}
 	if err := servicesRegisterValidate(ctx, data.Services, db.Validator); err != nil {
@@ -40,8 +42,8 @@ func validateToken(ctx context.Context, token string, db database.ValidateProvid
 	if token == "" {
 		return status.Error(codes.InvalidArgument, "token is empty")
 	}
-	if len(token) != 32 {
-		return status.Error(codes.InvalidArgument, "need to enter 32 characters in the token")
+	if len(token) != lengthToken {
+		return status.Error(codes.InvalidArgument, fmt.Sprintf("need to enter %v characters in the token", lengthToken))
 	}
 
 	var (
@@ -77,12 +79,17 @@ func validateToken(ctx context.Context, token string, db database.ValidateProvid
 		return status.Error(codes.InvalidArgument, "the token must contain small letters")
 	}
 
-	count, err := db.ValidateToken(ctx, token)
-	if count {
+	services, isUsed, err := db.ValidateToken(ctx, token)
+	if err != nil {
+		if code := status.Code(err); code != codes.NotFound {
+			return err
+		}
+	}
+	if isUsed {
 		return status.Errorf(codes.AlreadyExists, "token %v already exist", token)
 	}
-	if err != nil {
-		return status.Error(codes.Internal, "database error")
+	if services != "" {
+		return status.Errorf(codes.AlreadyExists, "token %v already exist", token)
 	}
 	return nil
 }

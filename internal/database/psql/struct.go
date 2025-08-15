@@ -10,11 +10,15 @@ import (
 )
 
 type StructDatabase struct {
-	Validator ValidateProvider
-	Base      BaseProvider
-	User      UserProvider
-	Token     TokenProvider
-	Cfg       config.ConfigEnv
+	Validator    ValidateProvider
+	Base         BaseProvider
+	User         UserProvider
+	Token        ApiTokenProvider
+	ActiveToken  ActiveTokenProvider
+	ForgotToken  ForgotTokenProvider
+	ConfirmToken ConfirmTokenProvider
+	Services     ServicesProvider
+	Cfg          config.ConfigEnv
 }
 
 type DatabaseProvider struct {
@@ -26,4 +30,10 @@ type DatabaseProvider struct {
 type ReturnOnceParam interface {
 	string | int | bool | time.Time |
 		sql.NullString | sql.NullInt64 | sql.NullBool | sql.NullTime
+}
+
+type ServicesList struct {
+	Id        int32     `db:"id"`
+	Name      string    `db:"name"`
+	CreatedAt time.Time `db:"created_at"`
 }

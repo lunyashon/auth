@@ -29,11 +29,15 @@ func GetInstance(cfg config.ConfigEnv, log *slog.Logger) (*StructDatabase, error
 			return
 		}
 		instance = &StructDatabase{
-			Cfg:       cfg,
-			Validator: provider,
-			Base:      provider,
-			User:      provider,
-			Token:     provider,
+			Cfg:          cfg,
+			Validator:    provider,
+			Base:         provider,
+			User:         provider,
+			Token:        provider,
+			ActiveToken:  provider,
+			ForgotToken:  provider,
+			ConfirmToken: provider,
+			Services:     provider,
 		}
 	})
 	if err != nil {

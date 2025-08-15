@@ -8,7 +8,8 @@ Dockerfile
 docker-compose.yml
 
 # Environment files
-.env
+*.env
+*.yaml
 .env.*
 
 # Logs
@@ -38,6 +39,10 @@ Thumbs.db
 # Build artifacts
 bin/
 dist/
+
+# air
+tmp/
+.air.toml
 
 # Coverage
 coverage.out

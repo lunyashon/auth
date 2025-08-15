@@ -45,10 +45,10 @@ func createFileWriter(path string) io.Writer {
 
 	return &lumberjack.Logger{
 		Filename:   path + "/app.log",
-		MaxSize:    100,  // Максимальный размер файла в мегабайтах
-		MaxBackups: 7,    // Максимальное количество старых файлов
-		MaxAge:     30,   // Максимальное количество дней хранения
-		Compress:   true, // Сжатие старых логов
-		LocalTime:  true, // Использовать локальное время
+		MaxSize:    100,
+		MaxBackups: 7,
+		MaxAge:     30,
+		Compress:   true,
+		LocalTime:  true,
 	}
 }

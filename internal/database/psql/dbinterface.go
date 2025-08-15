@@ -12,11 +12,11 @@ type ValidateProvider interface {
 	ValidateToken(
 		ctx context.Context,
 		apiKey string,
-	) (bool, error)
+	) (string, bool, error)
 	ValidateServices(
 		ctx context.Context,
-		services []string,
-	) ([]string, error)
+		services []int32,
+	) error
 	CheckDuplicateUser(
 		ctx context.Context,
 		email,
@@ -43,6 +43,7 @@ type UserProvider interface {
 	CreateInDB(
 		ctx context.Context,
 		data *sso.RegisterRequest,
+		services []int32,
 	) (int64, error)
 	GetParamsByEmail(
 		ctx context.Context,
@@ -57,19 +58,33 @@ type UserProvider interface {
 		ctx context.Context,
 		userId int,
 	) (*TypesParams, error)
+	GetProfile(
+		ctx context.Context,
+		userId int,
+	) (*sso.ProfileResponse, error)
+	GetMiniProfile(
+		ctx context.Context,
+		userId int,
+	) (*sso.MiniProfileResponse, error)
 }
 
-type TokenProvider interface {
+type ApiTokenProvider interface {
 	CreateToken(
 		ctx context.Context,
 		data *sso.TokenRequest,
+		token string,
 	) error
+}
+
+type ActiveTokenProvider interface {
 	InsertRefreshTokens(
 		ctx context.Context,
 		userId int,
 		refreshToken string,
 		createdAt time.Time,
 		expiresAt time.Duration,
+		ip string,
+		device string,
 	) error
 	CheckActiveToken(
 		ctx context.Context,
@@ -78,7 +93,15 @@ type TokenProvider interface {
 	RevokeToken(
 		ctx context.Context,
 		refreshToken string,
+		userId int,
 	) error
+	RevokeAllTokens(
+		ctx context.Context,
+		userId int,
+	) error
+}
+
+type ForgotTokenProvider interface {
 	CreateForgotToken(
 		ctx context.Context,
 		token string,
@@ -92,13 +115,31 @@ type TokenProvider interface {
 		ctx context.Context,
 		token string,
 	) error
+}
+
+type ConfirmTokenProvider interface {
 	CreateConfirmToken(
 		ctx context.Context,
 		code string,
 		email string,
 	) error
-	GetConfirmToken(
+	ConfirmEmailAndDeleteToken(
 		ctx context.Context,
 		code string,
+		userId int,
 	) error
+}
+
+type ServicesProvider interface {
+	GetServicesList(
+		ctx context.Context,
+	) ([]*sso.StructureServices, error)
+	GetServicesByName(
+		ctx context.Context,
+		name string,
+	) ([]*sso.StructureServices, error)
+	GetServiceById(
+		ctx context.Context,
+		id int32,
+	) (*sso.StructureServices, error)
 }

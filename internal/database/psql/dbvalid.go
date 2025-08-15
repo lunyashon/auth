@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/jmoiron/sqlx"
 
@@ -69,41 +70,42 @@ func (s *DatabaseProvider) CheckDuplicateUser(ctx context.Context, email, login 
 
 // Checking the access token for availability
 // Return count found tokens in Postgree or error
-func (s *DatabaseProvider) ValidateToken(ctx context.Context, item string) (bool, error) {
+func (s *DatabaseProvider) ValidateToken(ctx context.Context, item string) (string, bool, error) {
 
 	var (
-		exists     bool
+		services   string
+		isUsed     bool
 		q          string
 		methodName = "ValidateToken"
 	)
 
-	q = `SELECT EXISTS
-		 (SELECT 1 FROM tokens WHERE token = $1)`
+	q = `SELECT services, is_used FROM tokens WHERE token = $1`
 
-	if err := s.db.QueryRowContext(ctx, q, item).Scan(&exists); err != nil {
+	if err := s.db.QueryRowContext(ctx, q, item).Scan(&services, &isUsed); err != nil {
+		if err == sql.ErrNoRows {
+			return "", false, status.Errorf(codes.NotFound, "token %v not found", item)
+		}
 		errMessage := status.Errorf(codes.Internal, "failed to scan data: %v", err)
 		s.log.ErrorContext(
 			ctx,
 			"ERROR database",
 			"method", methodName,
 			"point", point,
-			"token", item,
 			"message", errMessage.Error(),
 		)
-		return false, status.Error(codes.Internal, "database error")
+		return "", false, status.Error(codes.Internal, "database error")
 	}
 
-	return exists, nil
+	return services, isUsed, nil
 }
 
 // Checking services in database
 // Return empty slice on success or (error and undiscovered services for error)
-func (s *DatabaseProvider) ValidateServices(ctx context.Context, item []string) ([]string, error) {
+func (s *DatabaseProvider) ValidateServices(ctx context.Context, item []int32) error {
 
 	var (
-		dbServices    = make(map[string]struct{})
-		validServices []string
-		res           []string
+		dbServices    = make(map[int32]struct{})
+		validServices []int32
 		methodName    = "ValidateServices"
 	)
 
@@ -111,9 +113,9 @@ func (s *DatabaseProvider) ValidateServices(ctx context.Context, item []string) 
 
 	if len(item) > 0 {
 		q := `
-			SELECT name 
+			SELECT id 
 			FROM services
-			WHERE name = any($1)`
+			WHERE id = any($1)`
 
 		if err := sqlx.SelectContext(ctx, s.db, &validServices, q, services); err != nil {
 			errMessage := status.Errorf(codes.Internal, "failed to query %v", err)
@@ -125,25 +127,25 @@ func (s *DatabaseProvider) ValidateServices(ctx context.Context, item []string) 
 				"services", services,
 				"message", errMessage.Error(),
 			)
-			return res, status.Error(codes.Internal, "database error")
+			return status.Error(codes.Internal, "database error")
 		}
 
 		for _, val := range validServices {
-			dbServices[val] = struct{}{}
+			dbServices[int32(val)] = struct{}{}
 		}
 	}
 
 	if res := findMissingServices(dbServices, item); len(res) > 0 {
-		return res, status.Errorf(codes.InvalidArgument, "{`%v`} invalid services:", point)
+		return status.Errorf(codes.InvalidArgument, "invalid services: %v", res)
 	}
 
-	return res, nil
+	return nil
 }
 
 // Comparison of 2 cross-sections of services to identify erroneous ones
 // Return slice services
-func findMissingServices(dbServices map[string]struct{}, inputServices []string) []string {
-	missing := make([]string, 0)
+func findMissingServices(dbServices map[int32]struct{}, inputServices []int32) []int32 {
+	missing := make([]int32, 0)
 	for _, val := range inputServices {
 		if _, exist := dbServices[val]; !exist {
 			missing = append(missing, val)
@@ -171,7 +173,6 @@ func (s *DatabaseProvider) CheckUsingToken(ctx context.Context, token string) (i
 			"ERROR database",
 			"method", methodName,
 			"point", point,
-			"token", token,
 			"message", errMessage.Error(),
 		)
 		return -1, status.Error(codes.Internal, "database error")

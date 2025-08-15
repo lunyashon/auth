@@ -53,8 +53,9 @@ func (r *Rabbit) sendToEmail(
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        body,
+			DeliveryMode: amqp.Persistent,
+			ContentType:  "application/json",
+			Body:         body,
 		},
 	); err != nil {
 		return err

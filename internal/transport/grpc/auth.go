@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	jwtsso "github.com/lunyashon/auth/internal/lib/jwt"
 	"github.com/lunyashon/auth/internal/services/authgo"
 
 	sso "github.com/lunyashon/protobuf/auth/gen/go/sso/v1"
@@ -29,7 +28,13 @@ func (s *ServerAPI) Login(
 	ctx context.Context,
 	data *sso.LoginRequest,
 ) (*sso.LoginResponse, error) {
-	tokens, err := s.auth.LoginUser(ctx, data)
+
+	device, ip, err := getDeviceAndIP(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tokens, err := s.auth.LoginUser(ctx, data, device, ip)
 	if err != nil {
 		return nil, err
 	}
@@ -56,16 +61,29 @@ func (s *ServerAPI) Register(
 }
 
 // Realization gRPC method CreateToken (create token)
-// Return gRPC bool value or error
+// Return gRPC token or error
 func (s *ServerAPI) CreateToken(
 	ctx context.Context,
 	data *sso.TokenRequest,
 ) (*sso.TokenResponse, error) {
 
-	result, err := s.auth.RegisterToken(ctx, data)
+	token, err := s.auth.RegisterToken(ctx, data)
 	return &sso.TokenResponse{
-		Result: result,
+		Token: token,
 	}, err
+}
+
+func (s *ServerAPI) GetServices(
+	ctx context.Context,
+	data *sso.ServicesRequest,
+) (*sso.ServicesResponse, error) {
+	services, err := s.auth.GetServices(ctx, data)
+	if err != nil {
+		return nil, err
+	}
+	return &sso.ServicesResponse{
+		Services: services,
+	}, nil
 }
 
 // Realization gRPC method logout user and off refresh and access token
@@ -74,23 +92,31 @@ func (s *ServerAPI) Logout(
 	ctx context.Context,
 	data *sso.LogoutRequest,
 ) (*sso.LogoutResponse, error) {
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return nil, status.Errorf(codes.InvalidArgument, "missing metadata")
+
+	accessToken, err := checkAuth(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	var accessToken string
-	if len(md.Get("Authorization")) != 0 {
-		token := md.Get("Authorization")[0]
-		accessToken = strings.TrimPrefix(token, "Bearer ")
-	} else {
-		return nil, status.Errorf(codes.InvalidArgument, "the required Authorization parameter was not passed")
-	}
-
-	err := s.auth.LogoutUser(ctx, accessToken, data.RefreshToken)
+	err = s.auth.OnceLogoutUser(ctx, accessToken, data.RefreshToken)
 	return &sso.LogoutResponse{
 		Success: err == nil,
-		Message: "success",
+	}, err
+}
+
+func (s *ServerAPI) MassLogout(
+	ctx context.Context,
+	data *sso.MassLogoutRequest,
+) (*sso.MassLogoutResponse, error) {
+
+	accessToken, err := checkAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.auth.MassLogoutUser(ctx, accessToken, data.RefreshToken)
+	return &sso.MassLogoutResponse{
+		Success: err == nil,
 	}, err
 }
 
@@ -100,12 +126,8 @@ func (s *ServerAPI) ValidateToken(
 	ctx context.Context,
 	data *sso.ValidateRequest,
 ) (*sso.ValidateResponse, error) {
-	id, err := jwtsso.ValidateAccessToken(
-		data.AccessToken,
-		data.Service,
-		s.auth.Yaml.NameSSOService,
-		s.auth.KeysStore.PublicKey,
-	)
+
+	id, err := s.auth.ValidateToken(ctx, data)
 	return &sso.ValidateResponse{
 		UserID: int64(id),
 	}, err
@@ -214,12 +236,17 @@ func (s *ServerAPI) CheckConfirmToken(
 	ctx context.Context,
 	data *sso.CheckConfirmRequest,
 ) (*sso.CheckConfirmResponse, error) {
-	err := s.auth.CheckConfirmToken(ctx, data.Token)
+	accessToken, err := checkAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
+	err = s.auth.CheckConfirmToken(ctx, data.Code, accessToken)
 	return &sso.CheckConfirmResponse{
 		Success: err == nil,
 	}, err
 }
 
+// NO REALIZATION
 // Realization gRPC method GetProfile (get profile)
 // Return gRPC profile or error
 func (s *ServerAPI) GetProfile(
@@ -230,6 +257,30 @@ func (s *ServerAPI) GetProfile(
 	if err != nil {
 		return nil, err
 	}
+
+	profile, err := s.auth.GetProfile(ctx, accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return profile, nil
+}
+
+func (s *ServerAPI) GetMiniProfile(
+	ctx context.Context,
+	data *sso.ProfileRequest,
+) (*sso.MiniProfileResponse, error) {
+	accessToken, err := checkAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	profile, err := s.auth.GetMiniProfile(ctx, accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return profile, nil
 }
 
 // NO USE
@@ -269,4 +320,39 @@ func checkAuth(ctx context.Context) (string, error) {
 	}
 
 	return accessToken, nil
+}
+
+func getDeviceAndIP(ctx context.Context) (string, string, error) {
+
+	var (
+		device, ip string
+	)
+
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+
+		if len(md.Get("cf-connecting-ip")) > 0 {
+			ip = md.Get("cf-connecting-ip")[0]
+		}
+
+		if len(md.Get("x-real-ip")) > 0 && ip == "" {
+			ip = md.Get("x-real-ip")[0]
+		}
+
+		if len(md.Get("x-forwarded-for")) > 0 {
+			ips := strings.Split(md.Get("x-forwarded-for")[0], ",")
+			if len(ips) > 0 {
+				ip = strings.TrimSpace(ips[0])
+			}
+		}
+
+		if len(md.Get("x-client-ip")) > 0 && ip == "" {
+			ip = md.Get("x-client-ip")[0]
+		}
+
+		if len(md.Get("grpcgateway-user-agent")) > 0 && device == "" {
+			device = md.Get("grpcgateway-user-agent")[0]
+		}
+	}
+
+	return device, ip, nil
 }

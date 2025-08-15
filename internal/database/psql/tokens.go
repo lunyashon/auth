@@ -17,6 +17,8 @@ type Token struct {
 	CreatedAt time.Time `db:"created_at"`
 	ExpiresAt time.Time `db:"expires_at"`
 	IsActive  bool      `db:"is_active"`
+	IP        string    `db:"ip"`
+	Device    string    `db:"device"`
 }
 
 type ForgotToken struct {
@@ -31,6 +33,8 @@ func (s *DatabaseProvider) InsertRefreshTokens(
 	refreshToken string,
 	createdAt time.Time,
 	expiresAt time.Duration,
+	ip string,
+	device string,
 ) error {
 
 	var (
@@ -46,9 +50,9 @@ func (s *DatabaseProvider) InsertRefreshTokens(
 
 	q := `
 		INSERT INTO active_tokens
-			(user_id, refresh_token, created_at, expires_at, is_active)
+			(user_id, refresh_token, created_at, expires_at, is_active, ip, device)
 		VALUES
-			($1, $2, $3, $4, true)
+			($1, $2, $3, $4, true, $5, $6)
 		RETURNING 
 			id`
 
@@ -56,9 +60,11 @@ func (s *DatabaseProvider) InsertRefreshTokens(
 		ctx,
 		q,
 		userId,
-		hash.HashToken(refreshToken),
+		hash.HashToken(refreshToken, s.cfg.HASH_PEPPER),
 		createdAt,
 		createdAt.Add(expiresAt),
+		ip,
+		device,
 	).Scan(&result)
 
 	if err != nil {
@@ -103,7 +109,7 @@ func (s *DatabaseProvider) CheckActiveToken(
 	err := s.db.QueryRowContext(
 		ctx,
 		q,
-		hash.HashToken(refreshToken),
+		hash.HashToken(refreshToken, s.cfg.HASH_PEPPER),
 	).Scan(
 		&token.ID,
 		&token.UserID,
@@ -111,6 +117,8 @@ func (s *DatabaseProvider) CheckActiveToken(
 		&token.CreatedAt,
 		&token.ExpiresAt,
 		&token.IsActive,
+		&token.IP,
+		&token.Device,
 	)
 
 	if err != nil {
@@ -138,6 +146,7 @@ func (s *DatabaseProvider) CheckActiveToken(
 func (s *DatabaseProvider) RevokeToken(
 	ctx context.Context,
 	refreshToken string,
+	userId int,
 ) error {
 
 	var (
@@ -156,12 +165,14 @@ func (s *DatabaseProvider) RevokeToken(
 		SET
 			is_active = false
 		WHERE
-			refresh_token = $1`
+			refresh_token = $1
+			AND user_id = $2`
 
 	result, err := s.db.ExecContext(
 		ctx,
 		q,
-		hash.HashToken(refreshToken),
+		hash.HashToken(refreshToken, s.cfg.HASH_PEPPER),
+		userId,
 	)
 
 	if err != nil {
@@ -196,6 +207,47 @@ func (s *DatabaseProvider) RevokeToken(
 	return nil
 }
 
+func (s *DatabaseProvider) RevokeAllTokens(
+
+	ctx context.Context,
+	userId int,
+) error {
+
+	var (
+		methodName = "RevokeAllTokens"
+		cancel     context.CancelFunc
+	)
+
+	if _, ok := ctx.Deadline(); !ok {
+		ctx, cancel = context.WithTimeout(ctx, defaultTokenCreationTimeout)
+		defer cancel()
+	}
+
+	q := `
+		UPDATE 
+			active_tokens 
+		SET 
+			is_active = false 
+		WHERE 
+			user_id = $1`
+
+	_, err := s.db.ExecContext(ctx, q, userId)
+
+	if err != nil {
+		errMessage := status.Errorf(codes.Internal, "failed to revoke all tokens %v", err)
+		s.log.ErrorContext(
+			ctx,
+			"ERROR database",
+			"method", methodName,
+			"point", point,
+			"message", errMessage.Error(),
+		)
+		return status.Errorf(codes.Internal, "database error")
+	}
+
+	return nil
+}
+
 func (s *DatabaseProvider) CreateForgotToken(
 	ctx context.Context,
 	token string,
@@ -217,7 +269,7 @@ func (s *DatabaseProvider) CreateForgotToken(
 		VALUES 
 			($1, $2)`
 
-	_, err := s.db.ExecContext(ctx, q, token, userId)
+	_, err := s.db.ExecContext(ctx, q, hash.HashToken(token, s.cfg.HASH_PEPPER), userId)
 
 	if err != nil {
 		errMessage := status.Errorf(codes.Internal, "failed to create forgot token %v", err)
@@ -260,7 +312,7 @@ func (s *DatabaseProvider) CheckForgotToken(
 	err := s.db.QueryRowContext(
 		ctx,
 		q,
-		token,
+		hash.HashToken(token, s.cfg.HASH_PEPPER),
 	).Scan(&forgotToken.UserID, &forgotToken.CreatedAt, &forgotToken.ExpiresAt)
 
 	if err != nil {
@@ -304,10 +356,11 @@ func (s *DatabaseProvider) DeleteForgotToken(
 
 	q := `DELETE FROM forgot_tokens WHERE token = $1`
 
-	_, err := s.db.ExecContext(ctx, q, token)
-
-	if err != nil {
+	if _, err := s.db.ExecContext(ctx, q, hash.HashToken(token, s.cfg.HASH_PEPPER)); err != nil {
 		errMessage := status.Errorf(codes.Internal, "failed to delete forgot token %v", err)
+		if err == sql.ErrNoRows {
+			return status.Errorf(codes.NotFound, "token not found")
+		}
 		s.log.ErrorContext(
 			ctx,
 			"ERROR database",
@@ -338,7 +391,7 @@ func (s *DatabaseProvider) CreateConfirmToken(
 
 	q := `INSERT INTO confirm_email_tokens (code, email) VALUES ($1, $2)`
 
-	_, err := s.db.ExecContext(ctx, q, code, email)
+	_, err := s.db.ExecContext(ctx, q, hash.HashToken(code, s.cfg.HASH_PEPPER), email)
 
 	if err != nil {
 		errMessage := status.Errorf(codes.Internal, "failed to create confirm email token %v", err)
@@ -355,14 +408,14 @@ func (s *DatabaseProvider) CreateConfirmToken(
 	return nil
 }
 
-func (s *DatabaseProvider) GetConfirmToken(
+func (s *DatabaseProvider) ConfirmEmailAndDeleteToken(
 	ctx context.Context,
 	code string,
+	userId int,
 ) error {
 	var (
-		methodName = "GetConfirmToken"
+		methodName = "ConfirmEmailAndDeleteToken"
 		cancel     context.CancelFunc
-		res        int
 	)
 
 	if _, ok := ctx.Deadline(); !ok {
@@ -370,23 +423,48 @@ func (s *DatabaseProvider) GetConfirmToken(
 		defer cancel()
 	}
 
-	q := `SELECT 1 FROM confirm_email_tokens WHERE code = $1`
+	q := `
+        WITH confirmed_user AS (
+            UPDATE users 
+            SET confirmed = true 
+            WHERE id = $1 
+            AND EXISTS (
+                SELECT 1 
+                FROM confirm_email_tokens cet
+                JOIN users u ON u.email = cet.email
+                WHERE cet.code = $2 
+                AND u.id = $1
+            )
+            RETURNING id
+        )
+        DELETE FROM confirm_email_tokens 
+        WHERE code = $2 
+        AND EXISTS (SELECT 1 FROM confirmed_user)`
 
-	err := s.db.QueryRowContext(ctx, q, code).Scan(&res)
+	result, err := s.db.ExecContext(ctx, q, userId, hash.HashToken(code, s.cfg.HASH_PEPPER))
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return status.Errorf(codes.NotFound, "token not found")
+			return status.Errorf(codes.NotFound, "data not found")
 		}
-		errMessage := status.Errorf(codes.Internal, "failed to check confirm email token %v", err)
+		errMessage := status.Errorf(codes.Internal, "failed to update confirm email: %v", err)
 		s.log.ErrorContext(
 			ctx,
 			"ERROR database",
 			"method", methodName,
 			"point", point,
+			"userId", userId,
 			"message", errMessage.Error(),
 		)
 		return status.Errorf(codes.Internal, "database error")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return status.Errorf(codes.Internal, "failed to get rows affected %v", err)
+	}
+	if rowsAffected == 0 {
+		return status.Errorf(codes.NotFound, "data not found")
 	}
 
 	return nil

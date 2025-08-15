@@ -5,6 +5,7 @@ import (
 	"github.com/lunyashon/auth/internal/config"
 	database "github.com/lunyashon/auth/internal/database/psql"
 	loger "github.com/lunyashon/auth/internal/lib/log"
+	"github.com/lunyashon/auth/internal/lib/redis"
 )
 
 func main() {
@@ -23,7 +24,10 @@ func main() {
 	}
 	defer db.Base.Close()
 
-	application := internal.New(log, yaml, cfg, db)
+	redis := redis.NewRedis(cfg, log)
+	defer redis.Connect.CloseClient()
+
+	application := internal.New(log, yaml, cfg, db, redis)
 	defer application.Shutdown(log)
 	if err := application.GRPCServer.Run(); err != nil {
 		panic(err)

@@ -19,7 +19,7 @@ var (
 
 // Create token in database
 // Return error or nil
-func (s *DatabaseProvider) CreateToken(ctx context.Context, data *sso.TokenRequest) error {
+func (s *DatabaseProvider) CreateToken(ctx context.Context, data *sso.TokenRequest, token string) error {
 
 	var (
 		cancel     context.CancelFunc
@@ -56,7 +56,7 @@ func (s *DatabaseProvider) CreateToken(ctx context.Context, data *sso.TokenReque
 
 	var insertingToken string
 
-	err = s.db.QueryRowContext(ctx, q, data.Token, jsonServ).Scan(&insertingToken)
+	err = s.db.QueryRowContext(ctx, q, token, jsonServ).Scan(&insertingToken)
 
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
@@ -68,8 +68,6 @@ func (s *DatabaseProvider) CreateToken(ctx context.Context, data *sso.TokenReque
 			"ERROR database",
 			"method", methodName,
 			"point", point,
-			"token", data.GetToken(),
-			"json", jsonServ,
 			"message", errMessage.Error(),
 		)
 		return status.Errorf(codes.Internal, "database error")

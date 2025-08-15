@@ -3,23 +3,39 @@ package rabbit
 import (
 	"fmt"
 	"log/slog"
+	"sync"
 
 	"github.com/lunyashon/auth/internal/config"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func New(log *slog.Logger, cfg *config.ConfigEnv, rbcfg config.ConfigRabbit) *RabbitService {
-	provider := Rabbit{
-		log: log,
-		cfg: cfg,
-		rbcfg: &RabbitConfig{
-			MaxRetries: rbcfg.MaxRetries,
-			RetryDelay: rbcfg.RetryDelay,
-		},
-	}
+
+	var (
+		provider *Rabbit
+		once     sync.Once
+		err      error
+	)
+
+	once.Do(func() {
+		provider = &Rabbit{
+			log: log,
+			cfg: cfg,
+			rbcfg: &RabbitConfig{
+				MaxRetries: rbcfg.MaxRetries,
+				RetryDelay: rbcfg.RetryDelay,
+			},
+		}
+		if err = provider.Connect(); err != nil {
+			panic(err)
+		}
+		if err = provider.Channel(); err != nil {
+			panic(err)
+		}
+	})
 	return &RabbitService{
-		Send:    &provider,
-		Connect: &provider,
+		Send:    provider,
+		Connect: provider,
 	}
 }
 

@@ -3,7 +3,7 @@ package jwtsso
 import (
 	"crypto/rsa"
 	"slices"
-	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -18,39 +18,39 @@ func ValidateAccessToken(
 	serviceName string,
 	nameSSO string,
 	publicKey *rsa.PublicKey,
-) (int, error) {
+) (*UserClaims, error) {
 
 	switch {
 	case tokenString == "":
-		return 0, status.Error(codes.InvalidArgument, "authorization token is empty")
+		return nil, status.Error(codes.InvalidArgument, "authorization token is empty")
 	case publicKey == nil:
-		return 0, status.Error(codes.InvalidArgument, "public key is empty")
+		return nil, status.Error(codes.InvalidArgument, "public key is empty")
 	}
 
 	token, err := parseToken(tokenString, publicKey)
 	if err != nil {
-		return 0, err
+		if strings.Contains(err.Error(), "token is expired") {
+			return nil, status.Error(codes.Unauthenticated, "token is expired")
+		}
+		return nil, err
 	}
 
 	if claims, ok := token.Claims.(*UserClaims); ok && token.Valid {
 		switch {
 		case claims.TokenType != "access":
-			return 0, status.Error(codes.InvalidArgument, "token type is not access type")
+			return nil, status.Error(codes.InvalidArgument, "token type is not access type")
 		case claims.Subject == "":
-			return 0, status.Error(codes.InvalidArgument, "subject is empty")
+			return nil, status.Error(codes.InvalidArgument, "subject is empty")
 		case claims.Issuer != nameSSO:
-			return 0, status.Error(codes.InvalidArgument, "issuer is invalid")
+			return nil, status.Error(codes.InvalidArgument, "issuer is invalid")
 		case !slices.Contains(claims.Audience, serviceName):
-			return 0, status.Errorf(codes.PermissionDenied, "access to '%s' denied", serviceName)
+			return nil, status.Errorf(codes.PermissionDenied, "access to '%s' denied", serviceName)
 		}
-		if id, err := strconv.Atoi(claims.Subject); err != nil {
-			return 0, err
-		} else {
-			return id, nil
-		}
+
+		return claims, nil
 	}
 
-	return 0, status.Error(codes.Internal, "failed to valid token")
+	return nil, status.Error(codes.Internal, "failed to valid token")
 }
 
 // Validate refresh token

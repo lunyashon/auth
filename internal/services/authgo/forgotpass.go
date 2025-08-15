@@ -22,16 +22,9 @@ func (s *AuthData) ForgotPassword(
 		return err
 	}
 
-	if err := s.DB.Token.CreateForgotToken(ctx, token, param.Id); err != nil {
+	if err := s.DB.ForgotToken.CreateForgotToken(ctx, token, param.Id); err != nil {
 		return err
 	}
-
-	s.Log.InfoContext(
-		ctx,
-		"Forgot password",
-		"email", email,
-		"token", token,
-	)
 
 	go func() {
 		body, err := json.Marshal(map[string]string{
@@ -51,7 +44,7 @@ func (s *AuthData) CheckForgotToken(
 	ctx context.Context,
 	token string,
 ) error {
-	if _, err := s.DB.Token.CheckForgotToken(ctx, token); err != nil {
+	if _, err := s.DB.ForgotToken.CheckForgotToken(ctx, token); err != nil {
 		return err
 	}
 	return nil

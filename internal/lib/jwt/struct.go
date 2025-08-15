@@ -8,6 +8,8 @@ import (
 
 type UserClaims struct {
 	TokenType string
+	IP        jwt.ClaimStrings
+	Device    jwt.ClaimStrings
 	jwt.RegisteredClaims
 }
 

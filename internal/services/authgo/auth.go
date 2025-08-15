@@ -8,7 +8,9 @@ import (
 	database "github.com/lunyashon/auth/internal/database/psql"
 	jwtsso "github.com/lunyashon/auth/internal/lib/jwt"
 	"github.com/lunyashon/auth/internal/lib/rabbit"
+	"github.com/lunyashon/auth/internal/lib/redis"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"google.golang.org/grpc/codes"
 
 	sso "github.com/lunyashon/protobuf/auth/gen/go/sso/v1"
 )
@@ -39,4 +41,15 @@ type AuthData struct {
 	QueueConfirmEmail amqp.Queue
 	KeysStore         *jwtsso.KeysStore
 	Yaml              *config.ConfigYaml
+	Redis             *redis.Redis
+}
+
+var errors = map[codes.Code]struct {
+	message string
+}{
+	codes.InvalidArgument:  {},
+	codes.PermissionDenied: {},
+	codes.Internal:         {},
+	codes.NotFound:         {},
+	codes.Unauthenticated:  {},
 }

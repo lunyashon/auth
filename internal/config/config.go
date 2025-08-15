@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"os"
+	"strconv"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
@@ -18,6 +19,10 @@ func Load() {
 // Return env data
 func LoadEnv() *ConfigEnv {
 	if err := godotenv.Load(path.Env); err != nil {
+		panic(err)
+	}
+	redisNumDB, err := strconv.Atoi(os.Getenv("REDIS_NUM_DB"))
+	if err != nil {
 		panic(err)
 	}
 	return &ConfigEnv{
@@ -36,6 +41,11 @@ func LoadEnv() *ConfigEnv {
 		RABBIT_PORT:                os.Getenv("RABBIT_PORT"),
 		RABBIT_QUEUE_FORGOT_TOKEN:  os.Getenv("RABBIT_QUEUE_FORGOT_TOKEN"),
 		RABBIT_QUEUE_CONFIRM_EMAIL: os.Getenv("RABBIT_QUEUE_CONFIRM_EMAIL"),
+		REDIS_HOST:                 os.Getenv("REDIS_HOST"),
+		REDIS_PORT:                 os.Getenv("REDIS_PORT"),
+		REDIS_PASSWORD:             os.Getenv("REDIS_PASSWORD"),
+		REDIS_NUM_DB:               redisNumDB,
+		HASH_PEPPER:                os.Getenv("HASH_PEPPER"),
 	}
 }
 
@@ -65,14 +75,14 @@ func fetchConfigPath() *Flags {
 	if f.Yaml == "" {
 		f.Yaml = os.Getenv("CONFIG_PATH")
 		if f.Yaml == "" {
-			f.Yaml = "/configs/config.yaml"
+			f.Yaml = "./configs/config.yaml"
 		}
 	}
 
 	if f.Env == "" {
 		f.Env = os.Getenv("CONFIG_ENV")
 		if f.Env == "" {
-			f.Env = "/configs/.env"
+			f.Env = "./configs/config.env"
 		}
 	}
 

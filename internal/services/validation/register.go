@@ -2,7 +2,7 @@ package validate
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"regexp"
 	"strings"
 	"unicode"
@@ -42,7 +42,7 @@ func Register(
 	ctx context.Context,
 	data *sso.RegisterRequest,
 	db *database.StructDatabase,
-) error {
+) ([]int32, error) {
 
 	if _, ok := ctx.Deadline(); !ok {
 		var cancel context.CancelFunc
@@ -51,24 +51,23 @@ func Register(
 	}
 
 	if err := loginRegisterValidate(data.Login); err != nil {
-		return err
+		return nil, err
 	}
 	if err := passwordRegisterValidate(data.Password); err != nil {
-		return err
+		return nil, err
 	}
 	if err := emailRegisterValidate(data.Email); err != nil {
-		return err
-	}
-	if err := servicesRegisterValidate(ctx, data.Services, db.Validator); err != nil {
-		return err
-	}
-	if err := apikeyRegisterValidate(ctx, data.Token, db.Validator); err != nil {
-		return err
+		return nil, err
 	}
 	if err := checkDuplicateUser(ctx, data.Email, data.Login, db.Validator); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	if services, err := apikeyRegisterValidate(ctx, data.Token, db.Validator); err != nil {
+		return nil, err
+	} else {
+		return services, nil
+	}
 }
 
 // Syntax checking login
@@ -162,15 +161,12 @@ func emailRegisterValidate(email string) error {
 
 // Syntax checking services and checking services in database
 // Return error or nil
-func servicesRegisterValidate(ctx context.Context, services []string, db database.ValidateProvider) error {
+func servicesRegisterValidate(ctx context.Context, services []int32, db database.ValidateProvider) error {
 	if len(services) == 0 {
 		return status.Error(codes.InvalidArgument, "services is empty")
 	}
 
-	if invalidServices, err := db.ValidateServices(ctx, services); err != nil {
-		if len(invalidServices) > 0 {
-			return status.Errorf(codes.InvalidArgument, "invalid services: %v", strings.Join(invalidServices, ","))
-		}
+	if err := db.ValidateServices(ctx, services); err != nil {
 		return err
 	}
 
@@ -179,30 +175,24 @@ func servicesRegisterValidate(ctx context.Context, services []string, db databas
 
 // Syntax checking API token and checking in database
 // Return error or nil
-func apikeyRegisterValidate(ctx context.Context, apikey string, db database.ValidateProvider) error {
-	if apikey == "" {
-		return status.Error(codes.InvalidArgument, "api_key is empty")
+func apikeyRegisterValidate(ctx context.Context, apikey string, db database.ValidateProvider) ([]int32, error) {
+	if apikey == "0" {
+		return []int32{}, nil
 	}
 
-	count, err := db.ValidateToken(ctx, apikey)
-	if !count {
-		return status.Errorf(codes.InvalidArgument, "token %v not exist", apikey)
-	}
+	services, isUsed, err := db.ValidateToken(ctx, apikey)
 	if err != nil {
-		return status.Error(codes.Internal, "database error")
+		return nil, err
 	}
 
-	used, err := db.CheckUsingToken(ctx, apikey)
-	if err != nil {
-		fmt.Println(err)
-		return status.Error(codes.Internal, "database error")
+	if isUsed {
+		return nil, status.Errorf(codes.AlreadyExists, "token %v is used", apikey)
 	}
 
-	if used > 0 {
-		return status.Errorf(codes.AlreadyExists, "token %v is used", apikey)
-	}
+	var servicesList []int32
+	json.Unmarshal([]byte(services), &servicesList)
 
-	return nil
+	return servicesList, nil
 }
 
 // Checking dublicat user in database

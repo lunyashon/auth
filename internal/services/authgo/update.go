@@ -34,7 +34,7 @@ func (a AuthData) UpdateAccessToken(ctx context.Context, data *sso.AccessTokenRe
 		return "", err
 	}
 
-	if err := a.DB.Token.CheckActiveToken(ctx, data.RefreshToken); err != nil {
+	if err := a.DB.ActiveToken.CheckActiveToken(ctx, data.RefreshToken); err != nil {
 		return "", err
 	}
 
@@ -57,6 +57,8 @@ func (a AuthData) UpdateAccessToken(ctx context.Context, data *sso.AccessTokenRe
 		a.Yaml.NameSSOService,
 		a.Yaml.AccessTokenTTL,
 		a.KeysStore.PrivateKey,
+		claims.IP[0],
+		claims.Device[0],
 	)
 	if err != nil {
 		errMessage := fmt.Sprintf("failed to generate access token: %v", err)

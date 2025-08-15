@@ -11,6 +11,7 @@ import (
 	database "github.com/lunyashon/auth/internal/database/psql"
 	jwtsso "github.com/lunyashon/auth/internal/lib/jwt"
 	"github.com/lunyashon/auth/internal/lib/rabbit"
+	"github.com/lunyashon/auth/internal/lib/redis"
 	"github.com/lunyashon/auth/internal/services/authgo"
 )
 
@@ -19,7 +20,13 @@ type App struct {
 	Rabbit     *rabbit.RabbitService
 }
 
-func New(log *slog.Logger, yaml *config.ConfigYaml, cfg *config.ConfigEnv, db *database.StructDatabase) *App {
+func New(
+	log *slog.Logger,
+	yaml *config.ConfigYaml,
+	cfg *config.ConfigEnv,
+	db *database.StructDatabase,
+	redis *redis.Redis,
+) *App {
 	rabbit := rabbit.New(log, cfg, yaml.Rabbit)
 	if err := rabbit.Connect.Connect(); err != nil {
 		log.Error("Failed to connect to RabbitMQ", "error", err)
@@ -46,6 +53,7 @@ func New(log *slog.Logger, yaml *config.ConfigYaml, cfg *config.ConfigEnv, db *d
 		KeysStore:         parseKeys(cfg.PRIVATE_KEY),
 		QueueForgotToken:  queueForgotToken,
 		QueueConfirmEmail: queueConfirmEmail,
+		Redis:             redis,
 	}
 	appGRPC := appgrpc.New(log, yaml.GRPS.Port, &auth)
 	return &App{

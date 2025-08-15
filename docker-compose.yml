@@ -1,3 +1,4 @@
+version: '3.9'
 services:
   auth:
     build: .
@@ -11,6 +12,12 @@ services:
       - CONFIG_PATH=/configs/config.yaml
       - CONFIG_ENV=/configs/config.env
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "grpcurl", "-plaintext", "localhost:50551", "health.Health/HealthCheck", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     networks:
       - auth-network
 

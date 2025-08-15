@@ -13,7 +13,11 @@ import (
 
 // Sign in user and get JWT token
 // Return model UserAuth (JWT, Services, Id and time to life token)
-func (a AuthData) LoginUser(ctx context.Context, data *protoc.LoginRequest) (*jwtsso.TokenPair, error) {
+func (a AuthData) LoginUser(
+	ctx context.Context,
+	data *protoc.LoginRequest,
+	device, ip string,
+) (*jwtsso.TokenPair, error) {
 
 	var (
 		method = "LoginUser"
@@ -35,6 +39,8 @@ func (a AuthData) LoginUser(ctx context.Context, data *protoc.LoginRequest) (*jw
 		a.Yaml.AccessTokenTTL,
 		a.Yaml.RefreshTokenTTL,
 		a.KeysStore.PrivateKey,
+		ip,
+		device,
 	)
 	if err != nil {
 		point := "token"
@@ -48,12 +54,14 @@ func (a AuthData) LoginUser(ctx context.Context, data *protoc.LoginRequest) (*jw
 		return nil, status.Error(codes.Internal, "failed to generate token")
 	}
 
-	if err := a.DB.Token.InsertRefreshTokens(
+	if err := a.DB.ActiveToken.InsertRefreshTokens(
 		ctx,
 		int(user.UID),
 		tokens.RefreshToken,
 		time.Now(),
 		a.Yaml.RefreshTokenTTL,
+		ip,
+		device,
 	); err != nil {
 		return nil, err
 	}

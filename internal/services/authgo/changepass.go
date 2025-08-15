@@ -3,7 +3,7 @@ package authgo
 import (
 	"bytes"
 	"context"
-	"fmt"
+	"strconv"
 
 	jwtsso "github.com/lunyashon/auth/internal/lib/jwt"
 	"github.com/lunyashon/auth/internal/lib/passauth"
@@ -12,16 +12,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-var errors = map[codes.Code]struct {
-	message string
-}{
-	codes.InvalidArgument:  {},
-	codes.PermissionDenied: {},
-	codes.Internal:         {},
-	codes.NotFound:         {},
-	codes.Unauthenticated:  {},
-}
-
 func (a *AuthData) ChangePassword(
 	ctx context.Context,
 	accessToken,
@@ -29,9 +19,9 @@ func (a *AuthData) ChangePassword(
 	newPassword string,
 ) error {
 
-	userId, err := jwtsso.ValidateAccessToken(
+	userClaims, err := jwtsso.ValidateAccessToken(
 		accessToken,
-		"sso.auth.change.password",
+		"sso.auth",
 		a.Yaml.NameSSOService,
 		a.KeysStore.PublicKey,
 	)
@@ -47,14 +37,17 @@ func (a *AuthData) ChangePassword(
 		return status.Errorf(codes.Internal, "internal server error")
 	}
 
+	userId, err := strconv.Atoi(userClaims.Subject)
+	if err != nil {
+		return status.Errorf(codes.InvalidArgument, "invalid user id")
+	}
+
 	param, err := a.DB.User.GetParamByUserId(ctx, userId)
 	if err != nil {
 		return err
 	}
 
 	rb := passauth.ExecAuthService(&passauth.RealBcrypt{})
-
-	fmt.Println(param)
 
 	if err := rb.VerifyPassword(oldPassword, param.Password); err != nil {
 		if _, ok := errors[status.Code(err)]; ok {
@@ -87,7 +80,7 @@ func (a *AuthData) ResetPassword(
 ) error {
 	rb := passauth.ExecAuthService(&passauth.RealBcrypt{})
 
-	userId, err := a.DB.Token.CheckForgotToken(ctx, token)
+	userId, err := a.DB.ForgotToken.CheckForgotToken(ctx, token)
 	if err != nil {
 		return err
 	}
@@ -110,7 +103,7 @@ func (a *AuthData) ResetPassword(
 		return status.Errorf(codes.InvalidArgument, "old and new passwords are the same")
 	}
 
-	if err := validate.PassValidateWithNew(ctx, password, password); err != nil {
+	if err := validate.ValidateNewPassword(ctx, password); err != nil {
 		return err
 	}
 
@@ -118,7 +111,7 @@ func (a *AuthData) ResetPassword(
 		return err
 	}
 
-	if err := a.DB.Token.DeleteForgotToken(ctx, token); err != nil {
+	if err := a.DB.ForgotToken.DeleteForgotToken(ctx, token); err != nil {
 		return err
 	}
 

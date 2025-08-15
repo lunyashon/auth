@@ -14,16 +14,33 @@ func GenerateToken(
 	nameSSO string,
 	accessTokenTTL, refreshTokenTTL time.Duration,
 	privateKey *rsa.PrivateKey,
+	ip, device string,
 ) (*TokenPair, error) {
 
 	services = append(services, "sso.auth", "sso.auth.change.password")
 
-	accessSigned, err := GenerateAccessToken(id, services, nameSSO, accessTokenTTL, privateKey)
+	accessSigned, err := GenerateAccessToken(
+		id,
+		services,
+		nameSSO,
+		accessTokenTTL,
+		privateKey,
+		ip,
+		device,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshSigned, err := GenerateRefreshToken(id, services, nameSSO, refreshTokenTTL, privateKey)
+	refreshSigned, err := GenerateRefreshToken(
+		id,
+		services,
+		nameSSO,
+		refreshTokenTTL,
+		privateKey,
+		ip,
+		device,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -40,10 +57,13 @@ func GenerateRefreshToken(
 	nameSSO string,
 	refreshTokenTTL time.Duration,
 	privateKey *rsa.PrivateKey,
+	ip, device string,
 ) (string, error) {
 
 	refreshClaims := UserClaims{
 		TokenType: "refresh",
+		IP:        jwt.ClaimStrings{ip},
+		Device:    jwt.ClaimStrings{device},
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(refreshTokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -68,10 +88,13 @@ func GenerateAccessToken(
 	nameSSO string,
 	accessTokenTTL time.Duration,
 	privateKey *rsa.PrivateKey,
+	ip, device string,
 ) (string, error) {
 
 	accessClaims := UserClaims{
 		TokenType: "access",
+		IP:        jwt.ClaimStrings{ip},
+		Device:    jwt.ClaimStrings{device},
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(accessTokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

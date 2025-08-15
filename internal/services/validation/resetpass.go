@@ -39,6 +39,20 @@ func PassValidateWithNew(ctx context.Context, oldPassword, newPassword string) e
 	return nil
 }
 
+func ValidateNewPassword(ctx context.Context, newPassword string) error {
+	if err := passwordRegisterValidate(newPassword); err != nil {
+		if _, ok := errors[status.Code(err)]; ok {
+			var errMsg bytes.Buffer
+			errMsg.WriteString(status.Convert(err).Message())
+			errMsg.WriteString(": ")
+			errMsg.WriteString("new password")
+			return status.Errorf(status.Code(err), "%v", errMsg.String())
+		}
+		return status.Errorf(codes.Internal, "internal server error")
+	}
+	return nil
+}
+
 func PassValidateWithoutNew(ctx context.Context, oldPassword string) error {
 	if err := passwordRegisterValidate(oldPassword); err != nil {
 		if _, ok := errors[status.Code(err)]; ok {

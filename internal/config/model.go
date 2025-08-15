@@ -38,6 +38,11 @@ type ConfigEnv struct {
 	RABBIT_PORT                string `env:"RABBIT_PORT" env-default:"5672"`
 	RABBIT_QUEUE_FORGOT_TOKEN  string `env:"RABBIT_QUEUE_FORGOT_TOKEN" env-default:"forgot_token"`
 	RABBIT_QUEUE_CONFIRM_EMAIL string `env:"RABBIT_QUEUE_CONFIRM_EMAIL" env-default:"confirm_email"`
+	REDIS_HOST                 string `env:"REDIS_HOST" env-default:"localhost"`
+	REDIS_PORT                 string `env:"REDIS_PORT" env-default:"6379"`
+	REDIS_PASSWORD             string `env:"REDIS_PASSWORD" env-default:""`
+	REDIS_NUM_DB               int    `env:"REDIS_NUM_DB" env-default:"1"`
+	HASH_PEPPER                string `env:"HASH_PEPPER" env-default:"e-toolnet"`
 }
 
 type Flags struct {
