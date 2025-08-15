@@ -26,5 +26,5 @@ go.work.sum
 *.yaml
 
 # air file from development
-temp/
+tmp/
 .air.toml
