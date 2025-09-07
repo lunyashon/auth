@@ -26,6 +26,7 @@ func NewRedis(config *config.ConfigEnv, log *slog.Logger) *Redis {
 		redis = &Redis{
 			TokenProvider: redisProvider,
 			Connect:       redisProvider,
+			Butoforc:      redisProvider,
 		}
 	})
 

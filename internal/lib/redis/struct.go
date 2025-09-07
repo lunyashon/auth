@@ -11,6 +11,7 @@ import (
 type Redis struct {
 	TokenProvider Token
 	Connect       Connect
+	Butoforc      Butoforc
 }
 
 type RedisProvider struct {
@@ -38,4 +39,9 @@ type Token interface {
 		expiredAt string,
 		token string,
 	) error
+}
+
+type Butoforc interface {
+	CheckTrye(ctx context.Context, login string) (int, error)
+	AddToTrye(ctx context.Context, login string, count int) error
 }

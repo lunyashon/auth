@@ -21,7 +21,27 @@ func (a AuthData) LoginUser(
 
 	var (
 		method = "LoginUser"
+		count  int
 	)
+
+	count, err := a.Redis.Butoforc.CheckTrye(ctx, data.Login)
+	if err != nil && err.Error() != "redis: nil" {
+		a.Log.ErrorContext(
+			ctx,
+			"failed to check trye",
+			"method", method,
+			"point", "trye.check",
+			"login", data.Login,
+			"message", err.Error(),
+		)
+		return nil, status.Error(codes.Internal, "server error")
+	}
+
+	if count > 7 {
+		return nil, status.Error(codes.ResourceExhausted, "too many attempts")
+	} else {
+		a.Redis.Butoforc.AddToTrye(ctx, data.Login, count+1)
+	}
 
 	if err := validate.Auth(ctx, data, a.DB); err != nil {
 		return nil, err
